@@ -1,0 +1,183 @@
+<x-kiosk-layout>
+    <div class="flex flex-col items-center w-full h-full text-center px-6">
+
+        {{-- Search Results Title --}}
+        <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-default mb-6">
+            Search Results
+        </h2>
+
+        {{-- Back to Search Button --}}
+        <a href="{{ route('kiosk.home') }}"
+            class="mb-6 px-12 py-6 text-3xl font-bold bg-secondary text-black rounded-kiosk shadow-lg hover:opacity-90 transition-all focus:ring-white border-4 border-white">
+            ⬅ Back to Search
+        </a>
+
+        {{-- Results Display --}}
+        @if($students->isEmpty())
+        <p class="text-default text-3xl sm:text-4xl">No students found.</p>
+        @else
+        <div class="w-full max-w-5xl space-y-6">
+            @foreach($students as $student)
+            <div class="p-6 border-4 border-primary bg-white hover:bg-secondary hover:text-white 
+                        rounded-lg text-xl sm:text-2xl md:text-3xl transition-all shadow-md cursor-pointer"
+                onclick="openStudentModal('{{ $student->student_id }}')">
+
+                {{-- Student Basic Info --}}
+                <p class="font-bold text-gray-900 hover:text-white">
+                    {{ $student->first_name }} {{ $student->last_name }}
+                </p>
+                <p class="text-lg sm:text-xl text-gray-700 hover:text-white">
+                    {{ $student->student_id }} • {{ $student->contact->email ?? 'No Email' }}
+                </p>
+                <p class="text-md sm:text-lg text-gray-600 hover:text-white">
+                    {{ $student->academics->year_level ?? 'N/A' }} - {{ $student->academics->program ?? 'N/A' }}
+                </p>
+                <p class="text-md sm:text-lg text-gray-600 hover:text-white">
+                    📍 {{ $student->contact->address ?? 'No Address' }} • 🎓 {{ $student->student_type }}
+                </p>
+            </div>
+            @endforeach
+        </div>
+
+        {{-- Pagination --}}
+        <div class="mt-6">
+            {{ $students->links() }}
+        </div>
+        @endif
+    </div>
+
+    {{-- 🚀 Full-Screen Scrollable Modal with Better Colors --}}
+    <div id="studentModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden">
+        <div class="bg-modal w-full max-w-4xl p-8 sm:p-12 rounded-lg shadow-2xl border-4 border-primary overflow-y-auto max-h-[85vh] relative">
+
+            {{-- Close Button (Fix Color) --}}
+            <button class="absolute top-4 right-4 text-4xl font-bold text-red-600 "
+                onclick="closeStudentModal()">
+                X
+            </button>
+
+            {{-- Student Name --}}
+            <h2 class="text-4xl font-bold mb-2 text-primary text-center" id="modalStudentName"></h2>
+            <p class="text-lg text-gray-700 text-center mb-6" id="modalStudentID"></p>
+
+            <div class="space-y-6">
+                {{-- 🏷️ Personal Details (Fix Background & Text Contrast) --}}
+                <div class="bg-white border-2 border-primary shadow-md p-5 rounded-lg">
+                    <h3 class="text-2xl font-bold text-primary mb-2">Personal Information</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-lg text-gray-900">
+                        <div><strong>Birth Date:</strong> <span id="modalBirthDate"></span></div>
+                        <div><strong>Gender:</strong> <span id="modalGender"></span></div>
+                        <div><strong>Nationality:</strong> <span id="modalNationality"></span></div>
+                        <div><strong>Religion:</strong> <span id="modalReligion"></span></div>
+                        <div><strong>Blood Type:</strong> <span id="modalBloodType"></span></div>
+                        <div><strong>Student Type:</strong> <span id="modalStudentType"></span></div>
+                    </div>
+                </div>
+
+                {{-- 🎓 Academic Information (Fixed Background & Borders) --}}
+                <div class="bg-white border-2 border-primary shadow-md p-5 rounded-lg">
+                    <h3 class="text-2xl font-bold text-primary mb-2">Academic Information</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-lg text-gray-900">
+                        <div><strong>Year Level:</strong> <span id="modalYearLevel"></span></div>
+                        <div><strong>Program:</strong> <span id="modalProgram"></span></div>
+                        <div><strong>College:</strong> <span id="modalCollege"></span></div>
+                        <div><strong>Section:</strong> <span id="modalSection"></span></div>
+                        <div><strong>GWA:</strong> <span id="modalGWA"></span></div>
+                        <div><strong>Enrollment Status:</strong> <span id="modalEnrollmentStatus"></span></div>
+                    </div>
+                </div>
+
+                {{-- 📞 Contact Information (Fix Colors & Add Border) --}}
+                <div class="bg-white border-2 border-primary shadow-md p-5 rounded-lg">
+                    <h3 class="text-2xl font-bold text-primary mb-2">Contact Information</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-lg text-gray-900">
+                        <div><strong>Email:</strong> <span id="modalEmail"></span></div>
+                        <div><strong>Phone:</strong> <span id="modalPhone"></span></div>
+                        <div><strong>Guardian Name:</strong> <span id="modalGuardian"></span></div>
+                        <div><strong>Guardian Contact:</strong> <span id="modalGuardianContact"></span></div>
+                        <div><strong>Emergency Contact:</strong> <span id="modalEmergency"></span></div>
+                        <div><strong>Address:</strong> <span id="modalAddress"></span></div>
+                    </div>
+                </div>
+
+                {{-- 🛠️ Skills Section (Now Looks Cleaner) --}}
+                <div class="bg-white border-2 border-primary shadow-md p-5 rounded-lg">
+                    <h3 class="text-2xl font-bold text-primary mb-2">Skills</h3>
+                    <ul id="modalSkills" class="list-disc ml-5 text-lg text-gray-900"></ul>
+                </div>
+
+                {{-- 🏆 Achievements Section (Improved Readability) --}}
+                <div class="bg-white border-2 border-primary shadow-md p-5 rounded-lg">
+                    <h3 class="text-2xl font-bold text-primary mb-2">Achievements</h3>
+                    <ul id="modalAchievements" class="list-disc ml-5 text-lg text-gray-900"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- JavaScript for Opening and Closing Modal --}}
+    <script>
+        function openStudentModal(studentID) {
+            let studentData = @json($students);
+            let student = studentData.data.find(s => s.student_id === studentID);
+
+            if (!student) return;
+
+            document.getElementById("modalStudentName").innerText = student.first_name + " " + student.last_name;
+            document.getElementById("modalStudentID").innerText = "Student ID: " + student.student_id;
+            document.getElementById("modalBirthDate").innerText = student.birth_date ?? 'N/A';
+            document.getElementById("modalGender").innerText = student.gender ?? 'N/A';
+            document.getElementById("modalNationality").innerText = student.nationality ?? 'N/A';
+            document.getElementById("modalReligion").innerText = student.religion ?? 'N/A';
+            document.getElementById("modalBloodType").innerText = student.blood_type ?? 'N/A';
+            document.getElementById("modalStudentType").innerText = student.student_type ?? 'N/A';
+
+            document.getElementById("modalYearLevel").innerText = student.academics?.year_level ?? 'N/A';
+            document.getElementById("modalProgram").innerText = student.academics?.program ?? 'N/A';
+            document.getElementById("modalCollege").innerText = student.academics?.college ?? 'N/A';
+            document.getElementById("modalSection").innerText = student.academics?.section ?? 'N/A';
+            document.getElementById("modalGWA").innerText = student.academics?.gwa ?? 'N/A';
+            document.getElementById("modalEnrollmentStatus").innerText = student.academics?.enrollment_status ?? 'N/A';
+
+            document.getElementById("modalAddress").innerText = student.contact?.address ?? 'N/A';
+            document.getElementById("modalPhone").innerText = student.contact?.phone_number ?? 'N/A';
+            document.getElementById("modalEmail").innerText = student.contact?.email ?? 'N/A';
+            document.getElementById("modalGuardian").innerText = student.contact?.guardian_name ?? 'N/A';
+            document.getElementById("modalGuardianContact").innerText = student.contact?.guardian_contact ?? 'N/A';
+            document.getElementById("modalEmergency").innerText = student.contact?.emergency_contact ?? 'N/A';
+
+            // Skills
+            let skillsList = document.getElementById("modalSkills");
+            skillsList.innerHTML = "";
+            if (student.skills && student.skills.length > 0) {
+                student.skills.forEach(skill => {
+                    let li = document.createElement("li");
+                    li.innerText = `${skill.skill_name} (${skill.proficiency_level})`;
+                    skillsList.appendChild(li);
+                });
+            } else {
+                skillsList.innerHTML = "<li>No skills listed.</li>";
+            }
+
+            // Achievements
+            let achievementsList = document.getElementById("modalAchievements");
+            achievementsList.innerHTML = "";
+            if (student.achievements && student.achievements.length > 0) {
+                student.achievements.forEach(achievement => {
+                    let li = document.createElement("li");
+                    li.innerText = `${achievement.achievement_name} - ${achievement.category} (${achievement.award_date})`;
+                    achievementsList.appendChild(li);
+                });
+            } else {
+                achievementsList.innerHTML = "<li>No achievements listed.</li>";
+            }
+
+            document.getElementById("studentModal").classList.remove("hidden");
+        }
+
+        function closeStudentModal() {
+            document.getElementById("studentModal").classList.add("hidden");
+        }
+    </script>
+
+</x-kiosk-layout>
