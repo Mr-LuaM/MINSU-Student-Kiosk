@@ -1,7 +1,7 @@
 <header class="w-full flex items-center justify-between p-3 md:p-4 bg-transparent">
     <div class="flex items-center space-x-2 md:space-x-3">
-        {{-- MinSU Logo (Responsive Size) --}}
-        <img src="{{ asset('assets/images/minsu-logo.png') }}" alt="MinSU Logo" class="h-10 md:h-12 lg:h-14">
+        {{-- MinSU Logo using x-application-logo --}}
+        <x-application-logo class="h-10 md:h-12 lg:h-14" />
 
         {{-- Title (Adaptive Sizing for Small Screens) --}}
         <h1 class="text-lg sm:text-xl md:text-3xl lg:text-4xl font-extrabold text-white">
@@ -17,6 +17,3 @@
         </svg>
     </button>
 </header>
-
-<!-- {{-- Include the Guidelines Modal --}}nilagay na sa app.layout
-@include('partials.guidelines-modal') -->
