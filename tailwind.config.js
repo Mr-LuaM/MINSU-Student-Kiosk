@@ -1,8 +1,8 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
 
-/** @type {import('tailwindcss').Config} */
 export default {
+    darkMode: 'class', // Ensures dark mode is optional & not automatic
     content: [
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
         './storage/framework/views/*.php',
@@ -13,69 +13,136 @@ export default {
     theme: {
         extend: {
             colors: {
-                primary: '#007C3D', // Slightly softened MinSU Green for a modern look
-                secondary: '#FFC72C', // Warmer Gold for better contrast
-                accent: '#004D1A', // Darker Green for hover effects and emphasis
-                background: '#F8F9FA', // Light Grayish White for a clean look
+                primary: '#007C3D', // MinSU Green - Modernized
+                secondary: '#FFC72C', // Gold for contrast
+                accent: '#004D1A', // Darker Green for hover effects
+                background: '#F8F9FA', // Light Grayish White
                 modal: '#FFFBEA', // Soft Gold-White for modals
+                card: '#FFFFFF', // Pure white for separation
+                border: '#D1D5DB', // Soft gray for subtle borders
+                
+                // **Text Colors for better UI Contrast**
                 text: {
-                    DEFAULT: '#2E2E2E', // Dark Gray for better readability
-                    contrast: '#FFFFFF', // Pure White for Highlights
+                    DEFAULT: '#2E2E2E', // Dark Gray for readability
+                    contrast: '#FFFFFF', // White for highlights
+                    muted: '#6B7280', // Softer Gray for secondary text
+                    danger: '#D32F2F', // Red for errors & warnings
+                    success: '#388E3C', // Green for success messages
+                    info: '#1976D2', // Blue for informative messages
                 },
-                card: '#FFFFFF', // Fully White Cards for better separation
-                border: '#D1D5DB', // Softer Gray for Borders
+                
+                // **Button & Interaction Colors**
+                button: {
+                    primary: '#007C3D',
+                    secondary: '#FFC72C',
+                    danger: '#D32F2F',
+                    muted: '#A5A5A5',
+                },
+
+                input: {
+                    bg: '#FFFFFF', 
+                    border: '#CBD5E1', 
+                    focus: '#007C3D',
+                    placeholder: '#94A3B8',
+                },
+
+                dropdown: {
+                    bg: '#FFFFFF', // Override dropdown menu background
+                    text: '#2E2E2E', // Override default text color
+                    hover: '#F3F4F6', // Clean hover effect
+                    border: '#D1D5DB',
+                },
             },
-    
-        
+
             fontSize: {
-                sm: ['1.125rem', { lineHeight: '1.75rem' }], // ~18px
-                base: ['1.5rem', { lineHeight: '2rem' }], // ~24px
-                lg: ['2rem', { lineHeight: '2.5rem' }], // ~32px
-                xl: ['2.5rem', { lineHeight: '3rem' }], // ~40px
-                '2xl': ['3rem', { lineHeight: '3.5rem' }], // ~48px
-                '3.5xl': ['3.5rem', { lineHeight: '4rem' }], // ~56px
-                '4xl': ['4rem', { lineHeight: '4.5rem' }], // ~64px
-                '5xl': ['5rem', { lineHeight: '5.5rem' }], // ~80px
-                '6xl': ['6rem', { lineHeight: '6.5rem' }], // ~96px
+                sm: ['1rem', { lineHeight: '1.5rem' }],
+                base: ['1.25rem', { lineHeight: '1.75rem' }],
+                lg: ['1.75rem', { lineHeight: '2.25rem' }],
+                xl: ['2.25rem', { lineHeight: '2.75rem' }],
+                '2xl': ['3rem', { lineHeight: '3.5rem' }],
+                '4xl': ['4rem', { lineHeight: '4.5rem' }],
+                '5xl': ['5rem', { lineHeight: '5.5rem' }],
             },
-            
 
             fontFamily: {
                 sans: ['Inter', 'Poppins', 'Nunito', ...defaultTheme.fontFamily.sans],
             },
 
             screens: {
-                sm: '640px', // Phones
-                md: '768px', // Tablets
-                lg: '1024px', // Laptops / Small Kiosks
-                xl: '1280px', // Large Screens
-                xxl: '1440px', // Extra Large Kiosk Displays
+                sm: '640px', 
+                md: '768px', 
+                lg: '1024px',
+                xl: '1280px', 
+                xxl: '1440px',
             },
 
             spacing: {
-                18: '4.5rem', // Adjusted button spacing
-                22: '5.5rem', // Better padding for kiosks
-                button: '6rem', // Large buttons for touchscreen kiosks
+                18: '4.5rem',
+                22: '5.5rem',
+                button: '6rem',
             },
 
             borderRadius: {
-                kiosk: '1rem', // Softer rounded edges for kiosk UI
+                kiosk: '1rem',
+                sm: '6px',
+                md: '10px',
+                lg: '16px',
             },
 
             cursor: {
-                pointer: 'pointer', // Ensures touch-friendly buttons
+                pointer: 'pointer',
+                disabled: 'not-allowed',
             },
 
             boxShadow: {
-                kiosk: '0px 4px 10px rgba(0, 0, 0, 0.3)', // Soft shadow for kiosk buttons
+                kiosk: '0px 4px 10px rgba(0, 0, 0, 0.3)',
+                card: '0px 2px 8px rgba(0, 0, 0, 0.15)',
+                modal: '0px 6px 20px rgba(0, 0, 0, 0.25)',
             },
 
             maxWidth: {
-                kiosk: '80%', // Prevents text from stretching too wide on large screens
+                kiosk: '80%',
+                form: '720px',
             },
 
             transitionTimingFunction: {
-                smooth: 'cubic-bezier(0.4, 0, 0.2, 1)', // Smooth UI transitions
+                smooth: 'cubic-bezier(0.4, 0, 0.2, 1)',
+            },
+
+            transitionDuration: {
+                DEFAULT: '300ms',
+                fast: '150ms',
+                slow: '500ms',
+            },
+
+            opacity: {
+                10: '0.1',
+                20: '0.2',
+                30: '0.3',
+                40: '0.4',
+                50: '0.5',
+                60: '0.6',
+                70: '0.7',
+                80: '0.8',
+                90: '0.9',
+            },
+
+            extend: {
+                backgroundColor: {
+                    hover: '#005A2C',
+                },
+                ringColor: {
+                    focus: '#004D1A',
+                },
+
+                // **Dropdown Fix (Ensures it stays visible above other content)**
+                zIndex: {
+                    dropdown: '50',
+                },
+
+                borderColor: {
+                    focus: '#004D1A',
+                },
             },
         },
     },

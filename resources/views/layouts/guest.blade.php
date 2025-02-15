@@ -27,6 +27,7 @@
 </head>
 
 <body class="relative font-sans text-gray-900 antialiased">
+    <livewire:toasts />
 
     <!-- Background Tint Overlay (Behind Everything) -->
     <div class="absolute inset-0 bg-gray-900 opacity-50 z-0"></div>
@@ -43,6 +44,7 @@
             {{ $slot }}
         </div>
     </div>
+    @livewireScriptConfig
 
 </body>
 

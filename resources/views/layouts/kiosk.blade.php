@@ -19,6 +19,7 @@
 </head>
 
 <body class="relative h-screen flex flex-col overflow-hidden text-white">
+    <livewire:toasts />
 
     {{-- Background Tint Overlay (Behind Everything Except Header) --}}
     <div class="absolute inset-0 bg-gray-900 opacity-50 z-0"></div>
@@ -41,6 +42,8 @@
 
     {{-- 🚀 Move Modal Here to Ensure It's on Top --}}
     @include('partials.guidelines-modal')
+    @livewireScriptConfig
+
 </body>
 
 </html>
