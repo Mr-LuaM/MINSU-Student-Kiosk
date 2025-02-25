@@ -9,12 +9,10 @@ use App\Models\Academic;
 use App\Models\Skill;
 use App\Models\Achievement;
 use App\Models\User;
-use Usernotnull\Toast\Concerns\WireToast;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
-    use WireToast; // <-- add this
-
     /**
      * Display the admin dashboard.
      */
@@ -63,26 +61,130 @@ class AdminController extends Controller
     /**
      * Store a newly created student in the database.
      */
+
     public function storeStudent(Request $request)
     {
-        $validatedData = $request->validate([
-            'student_id' => 'required|string|unique:students,student_id|max:20',
-            'first_name' => 'required|string|max:50',
-            'middle_name' => 'nullable|string|max:50',
-            'last_name' => 'required|string|max:50',
-            'suffix' => 'nullable|string|max:10',
-            'birth_date' => 'required|date',
-            'gender' => 'required|in:Male,Female,Other',
-            'nationality' => 'required|string|max:50',
-            'religion' => 'nullable|string|max:50',
-            'blood_type' => 'nullable|string|max:5',
-            'student_type' => 'required|in:Regular,Irregular,Transferee,Foreign',
-        ]);
+        try {
+            Log::info('storeStudent() called', ['request' => $request->all()]);
 
-        Student::create($validatedData);
+            // ✅ Auto-generate student_id
+            $latestStudent = Student::latest('student_id')->first(); // Get latest student by ID
+            $lastNumber = $latestStudent ? (int) substr($latestStudent->student_id, 1) : 10000; // Default start: S10000
+            $newStudentId = 'S' . ($lastNumber + 1); // Increment last ID
 
-        return redirect()->route('admin.students.index')->with('success', 'Student Added Successfully!');
+            Log::info('Generated student_id', ['student_id' => $newStudentId]);
+
+            // ✅ Validate Student Core Data
+            $validatedStudentData = $request->validate([
+                'first_name' => 'required|string|max:50',
+                'middle_name' => 'nullable|string|max:50',
+                'last_name' => 'required|string|max:50',
+                'suffix' => 'nullable|string|max:10',
+                'birth_date' => 'required|date',
+                'gender' => 'required|in:Male,Female,Other',
+                'nationality' => 'required|string|max:50',
+                'religion' => 'nullable|string|max:50',
+                'blood_type' => 'nullable|string|max:5',
+                'student_type' => 'required|in:Regular,Irregular,Transferee,Foreign',
+            ]);
+            Log::info('Student core data validated', $validatedStudentData);
+
+            // ✅ Validate Academic Data
+            $validatedAcademicData = $request->validate([
+                'student_number' => 'required|string|unique:academics,student_number|max:20',
+                'enrollment_status' => 'required|in:Enrolled,Dropped,Graduated',
+                'year_level' => 'required|integer|min:1',
+                'college' => 'nullable|string|max:100',
+                'program' => 'nullable|string|max:100',
+                'section' => 'nullable|string|max:20',
+                'gwa' => 'nullable|numeric|between:0,5.00',
+            ]);
+            Log::info('Academic data validated', $validatedAcademicData);
+
+            // ✅ Validate Contact Data
+            $validatedContactData = $request->validate([
+                'email' => 'nullable|email|max:100',
+                'phone_number' => 'nullable|string|max:15',
+                'address' => 'nullable|string',
+                'guardian_name' => 'nullable|string|max:100',
+                'guardian_contact' => 'nullable|string|max:15',
+                'emergency_contact' => 'nullable|string|max:15',
+            ]);
+            Log::info('Contact data validated', $validatedContactData);
+
+            // ✅ Add the auto-generated student_id
+            $validatedStudentData['student_id'] = $newStudentId;
+
+            // ✅ Create Student Record
+            $student = Student::create($validatedStudentData);
+            Log::info('Student record created', ['student_id' => $student->student_id]);
+
+            // ✅ Create Academics Record
+            $student->academics()->create($validatedAcademicData);
+            Log::info('Academic record created', ['student_id' => $student->student_id]);
+
+            // ✅ Create Contact Record
+            $student->contact()->create($validatedContactData);
+            Log::info('Contact record created', ['student_id' => $student->student_id]);
+
+            // ✅ Handle Skills (if provided)
+            if ($request->has('skills')) {
+                Log::info('Skills found in request', $request->input('skills'));
+
+                $validatedSkills = collect($request->input('skills'))->map(function ($skill) {
+                    return [
+                        'skill_name' => $skill['skill_name'] ?? null,
+                        'proficiency_level' => $skill['proficiency_level'] ?? null,
+                    ];
+                })->filter(fn($skill) => $skill['skill_name'] !== null); // Remove empty skills
+
+                if ($validatedSkills->isNotEmpty()) {
+                    $student->skills()->createMany($validatedSkills);
+                    Log::info('Skills stored', ['skills' => $validatedSkills]);
+                }
+            }
+
+            // ✅ Handle Achievements (if provided)
+            if ($request->has('achievements')) {
+                Log::info('Achievements found in request', $request->input('achievements'));
+
+                $validatedAchievements = collect($request->input('achievements'))->map(function ($achievement) {
+                    return [
+                        'achievement_name' => $achievement['achievement_name'] ?? null,
+                        'category' => $achievement['category'] ?? null,
+                        'award_date' => $achievement['award_date'] ?? null,
+                        'awarding_body' => $achievement['awarding_body'] ?? null,
+                    ];
+                })->filter(fn($achievement) => $achievement['achievement_name'] !== null); // Remove empty achievements
+
+                if ($validatedAchievements->isNotEmpty()) {
+                    $student->achievements()->createMany($validatedAchievements);
+                    Log::info('Achievements stored', ['achievements' => $validatedAchievements]);
+                }
+            }
+
+            Log::info('Student creation successful', ['student_id' => $student->student_id]);
+
+            return redirect()->route('admin.students.index')->with('success', 'Student Added Successfully!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Validation error in storeStudent()', ['errors' => $e->errors()]);
+
+            return redirect()->back()
+                ->withInput()
+                ->withErrors($e->validator) // Flash validation errors
+                ->with('error', implode(', ', collect($e->validator->errors()->all())->toArray())); // Convert errors to string
+        } catch (\Exception $e) {
+            Log::error('Error in storeStudent()', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return redirect()->back()->with('error', 'An unexpected error occurred. Please try again.');
+        }
     }
+
+
 
     /**
      * Display the specified student.
@@ -109,7 +211,7 @@ class AdminController extends Controller
      */
     public function updateStudent(Request $request, $id)
     {
-        $student = Student::with(['academics', 'contact'])->findOrFail($id);
+        $student = Student::with(['academics', 'contact', 'skills', 'achievements'])->findOrFail($id);
 
         // Validate Student Core Data
         $validatedStudentData = $request->validate([
@@ -145,28 +247,52 @@ class AdminController extends Controller
             'emergency_contact' => 'nullable|string|max:15',
         ]);
 
-        // Update Student Core Data
+        // ✅ Update Student Core Data
         $student->update($validatedStudentData);
 
-        // Update Academics if exists
+        // ✅ Update Academics if exists, or create a new record
         if ($student->academics) {
             $student->academics->update($validatedAcademicData);
         } else {
             $student->academics()->create($validatedAcademicData);
         }
 
-        // Update Contact if exists
+        // ✅ Update Contact if exists, or create a new record
         if ($student->contact) {
             $student->contact->update($validatedContactData);
         } else {
             $student->contact()->create($validatedContactData);
         }
 
-        toast()
-            ->success('Student updated successfully!')
-            ->pushOnNextPage();
+        // ✅ Update Skills
+        $validatedSkills = $request->input('skills', []);
+        $student->skills()->delete(); // Remove existing skills to replace with new ones
 
-        return redirect()->route('admin.students.index');
+        foreach ($validatedSkills as $skill) {
+            if (!empty($skill['skill_name'])) {
+                $student->skills()->create([
+                    'skill_name' => $skill['skill_name'],
+                    'proficiency_level' => $skill['proficiency_level'],
+                ]);
+            }
+        }
+
+        // ✅ Update Achievements
+        $validatedAchievements = $request->input('achievements', []);
+        $student->achievements()->delete(); // Remove existing achievements to replace with new ones
+
+        foreach ($validatedAchievements as $achievement) {
+            if (!empty($achievement['achievement_name'])) {
+                $student->achievements()->create([
+                    'achievement_name' => $achievement['achievement_name'],
+                    'category' => $achievement['category'],
+                    'award_date' => $achievement['award_date'],
+                    'awarding_body' => $achievement['awarding_body'],
+                ]);
+            }
+        }
+
+        return redirect()->route('admin.students.index')->with('success', 'Student Updated Successfully!');
     }
 
 

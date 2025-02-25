@@ -31,8 +31,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 
     // Manage Students (Now under AdminController)
     Route::get('/students', [AdminController::class, 'studentsIndex'])->name('admin.students.index');
-    Route::get('/students/create', [AdminController::class, 'createStudent'])->name('admin.students.create');
     Route::post('/students', [AdminController::class, 'storeStudent'])->name('admin.students.store');
+    Route::get('/students/create', [AdminController::class, 'createStudent'])->name('admin.students.create');
     Route::get('/students/{id}', [AdminController::class, 'showStudent'])->name('admin.students.show');
     Route::get('/students/{id}/edit', [AdminController::class, 'editStudent'])->name('admin.students.edit');
     Route::put('/students/{id}', [AdminController::class, 'updateStudent'])->name('admin.students.update');

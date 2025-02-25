@@ -43,15 +43,12 @@
             z-index: -1;
         }
     </style>
-    @livewireStyles
-
 </head>
 
 <body class="font-sans antialiased relative flex flex-col min-h-screen text-white">
-    <livewire:toasts />
 
     {{-- Navigation Bar (Ensures it's above the overlay) --}}
-    <header class="relative z-10">
+    <header class="relative z-100">
         @include('layouts.navigation')
     </header>
 
@@ -76,8 +73,6 @@
 
     {{-- Include Modal (Ensures it's always on top) --}}
     @include('partials.guidelines-modal')
-    @livewireScripts
-    @toastScripts
 
 </body>
 

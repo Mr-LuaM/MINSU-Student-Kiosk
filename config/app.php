@@ -123,4 +123,7 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'idle_redirect_url' => env('IDLE_REDIRECT_URL', 'http://127.0.0.1:8000/'),
+
+
 ];

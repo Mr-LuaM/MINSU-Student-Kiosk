@@ -8,19 +8,24 @@ export default {
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
         './resources/**/*.js',
+        './vendor/usernotnull/tall-toasts/config/**/*.php',
+        './vendor/usernotnull/tall-toasts/resources/views/**/*.blade.php',
     ],
 
     theme: {
         extend: {
             colors: {
                 primary: '#007C3D', // MinSU Green - Modernized
-                secondary: '#FFC72C', // Gold for contrast
+                secondary: {
+                    DEFAULT: '#FFC72C', // Gold for contrast
+                    darken: '#E6A800', // Darker Gold for hover effects
+                },                
                 accent: '#004D1A', // Darker Green for hover effects
                 background: '#F8F9FA', // Light Grayish White
                 modal: '#FFFBEA', // Soft Gold-White for modals
                 card: '#FFFFFF', // Pure white for separation
                 border: '#D1D5DB', // Soft gray for subtle borders
-                
+
                 // **Text Colors for better UI Contrast**
                 text: {
                     DEFAULT: '#2E2E2E', // Dark Gray for readability
@@ -30,26 +35,38 @@ export default {
                     success: '#388E3C', // Green for success messages
                     info: '#1976D2', // Blue for informative messages
                 },
-                
+
                 // **Button & Interaction Colors**
                 button: {
-                    primary: '#007C3D',
-                    secondary: '#FFC72C',
-                    danger: '#D32F2F',
+                    primary: {
+                        DEFAULT: '#007C3D',
+                        hover: '#005A2C',
+                        focus: '#004D1A',
+                    },
+                    secondary: {
+                        DEFAULT: '#FFC72C',
+                        hover: '#E6A800',
+                        focus: '#CC9700',
+                    },
+                    danger: {
+                        DEFAULT: '#D32F2F',
+                        hover: '#B71C1C',
+                        focus: '#9A0007',
+                    },
                     muted: '#A5A5A5',
                 },
 
                 input: {
                     bg: '#FFFFFF', 
                     border: '#CBD5E1', 
-                    focus: '#007C3D',
+                    focus: '#004D1A', // FIXED to match other focus colors
                     placeholder: '#94A3B8',
                 },
 
                 dropdown: {
-                    bg: '#FFFFFF', // Override dropdown menu background
-                    text: '#2E2E2E', // Override default text color
-                    hover: '#F3F4F6', // Clean hover effect
+                    bg: '#FFFFFF', 
+                    text: '#2E2E2E', 
+                    hover: '#F3F4F6', 
                     border: '#D1D5DB',
                 },
             },
@@ -127,22 +144,14 @@ export default {
                 90: '0.9',
             },
 
-            extend: {
-                backgroundColor: {
-                    hover: '#005A2C',
-                },
-                ringColor: {
-                    focus: '#004D1A',
-                },
+            zIndex: {
+                dropdown: '100',
+                modal: '200',
+                toast: '300',
+            },
 
-                // **Dropdown Fix (Ensures it stays visible above other content)**
-                zIndex: {
-                    dropdown: '50',
-                },
-
-                borderColor: {
-                    focus: '#004D1A',
-                },
+            borderColor: {
+                focus: '#004D1A',
             },
         },
     },

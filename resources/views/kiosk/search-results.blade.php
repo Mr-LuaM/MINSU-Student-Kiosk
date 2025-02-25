@@ -55,16 +55,16 @@
                 onclick="closeStudentModal()">
                 X
             </button>
-
-            {{-- Student Name --}}
-            <h2 class="text-4xl font-bold mb-2 text-primary text-center" id="modalStudentName"></h2>
-            <p class="text-lg text-gray-700 text-center mb-6" id="modalStudentID"></p>
+            {{-- 🎓 Student Name --}}
+            <h2 class="text-4xl font-bold mb-2 text-primary" id="modalStudentName"></h2>
+            <p class="text-lg text-gray-600 mb-6" id="modalStudentID"></p>
 
             <div class="space-y-6">
-                {{-- 🏷️ Personal Details (Fix Background & Text Contrast) --}}
-                <div class="bg-white border-2 border-primary shadow-md p-5 rounded-lg">
-                    <h3 class="text-2xl font-bold text-primary mb-2">Personal Information</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-lg text-gray-900">
+                {{-- 🏷️ Personal Information --}}
+                <div class="bg-gray-100 border border-primary shadow-md p-6 rounded-lg">
+                    <h3 class="text-2xl font-bold text-primary mb-4">Personal Information</h3>
+                    <hr class="border-t border-gray-300 mb-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-lg text-gray-800">
                         <div><strong>Birth Date:</strong> <span id="modalBirthDate"></span></div>
                         <div><strong>Gender:</strong> <span id="modalGender"></span></div>
                         <div><strong>Nationality:</strong> <span id="modalNationality"></span></div>
@@ -74,10 +74,11 @@
                     </div>
                 </div>
 
-                {{-- 🎓 Academic Information (Fixed Background & Borders) --}}
-                <div class="bg-white border-2 border-primary shadow-md p-5 rounded-lg">
-                    <h3 class="text-2xl font-bold text-primary mb-2">Academic Information</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-lg text-gray-900">
+                {{-- 🎓 Academic Information --}}
+                <div class="bg-gray-100 border border-primary shadow-md p-6 rounded-lg">
+                    <h3 class="text-2xl font-bold text-primary mb-4">Academic Information</h3>
+                    <hr class="border-t border-gray-300 mb-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-lg text-gray-800">
                         <div><strong>Year Level:</strong> <span id="modalYearLevel"></span></div>
                         <div><strong>Program:</strong> <span id="modalProgram"></span></div>
                         <div><strong>College:</strong> <span id="modalCollege"></span></div>
@@ -87,10 +88,11 @@
                     </div>
                 </div>
 
-                {{-- 📞 Contact Information (Fix Colors & Add Border) --}}
-                <div class="bg-white border-2 border-primary shadow-md p-5 rounded-lg">
-                    <h3 class="text-2xl font-bold text-primary mb-2">Contact Information</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-lg text-gray-900">
+                {{-- 📞 Contact Information --}}
+                <div class="bg-gray-100 border border-primary shadow-md p-6 rounded-lg">
+                    <h3 class="text-2xl font-bold text-primary mb-4">Contact Information</h3>
+                    <hr class="border-t border-gray-300 mb-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-lg text-gray-800">
                         <div><strong>Email:</strong> <span id="modalEmail"></span></div>
                         <div><strong>Phone:</strong> <span id="modalPhone"></span></div>
                         <div><strong>Guardian Name:</strong> <span id="modalGuardian"></span></div>
@@ -100,16 +102,18 @@
                     </div>
                 </div>
 
-                {{-- 🛠️ Skills Section (Now Looks Cleaner) --}}
-                <div class="bg-white border-2 border-primary shadow-md p-5 rounded-lg">
-                    <h3 class="text-2xl font-bold text-primary mb-2">Skills</h3>
-                    <ul id="modalSkills" class="list-disc ml-5 text-lg text-gray-900"></ul>
+                {{-- 🛠️ Skills --}}
+                <div class="bg-gray-100 border border-primary shadow-md p-6 rounded-lg">
+                    <h3 class="text-2xl font-bold text-primary mb-4">Skills</h3>
+                    <hr class="border-t border-gray-300 mb-4">
+                    <ul id="modalSkills" class="list-disc ml-6 text-lg text-gray-800 space-y-1"></ul>
                 </div>
 
-                {{-- 🏆 Achievements Section (Improved Readability) --}}
-                <div class="bg-white border-2 border-primary shadow-md p-5 rounded-lg">
-                    <h3 class="text-2xl font-bold text-primary mb-2">Achievements</h3>
-                    <ul id="modalAchievements" class="list-disc ml-5 text-lg text-gray-900"></ul>
+                {{-- 🏆 Achievements --}}
+                <div class="bg-gray-100 border border-primary shadow-md p-6 rounded-lg">
+                    <h3 class="text-2xl font-bold text-primary mb-4">Achievements</h3>
+                    <hr class="border-t border-gray-300 mb-4">
+                    <ul id="modalAchievements" class="list-disc ml-6 text-lg text-gray-800 space-y-1"></ul>
                 </div>
             </div>
         </div>
