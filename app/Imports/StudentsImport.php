@@ -10,106 +10,130 @@ use App\Models\Achievement;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
-class StudentsImport implements ToCollection, WithHeadingRow
+class StudentsImport implements ToCollection, WithHeadingRow, WithChunkReading
 {
     public function collection(Collection $rows)
     {
+        Log::info("Import process started. Total rows: " . count($rows));
+
         foreach ($rows as $row) {
             try {
-                // Generate Student ID if missing (e.g., S+YEAR+INCREMENT format)
-                $year = date('Y');
-                $latestStudent = Student::latest('student_id')->first();
-                $nextNumber = $latestStudent ? ((int)substr($latestStudent->student_id, 5)) + 1 : 10001;
-                $studentId = 'S' . $year . $nextNumber;
+                // 🔹 Normalize column names (lowercase for consistency)
+                $normalizedRow = array_change_key_case($row->toArray(), CASE_LOWER);
 
-                // Validate enrollment_status to match ENUM values
-                $validEnrollmentStatuses = ['Enrolled', 'Dropped', 'Graduated'];
-                $enrollmentStatus = in_array($row['enrollment_status'], $validEnrollmentStatuses) ?
-                    $row['enrollment_status'] : 'Enrolled';
+                // 🔹 Ensure required fields exist
+                if (!isset($normalizedRow['student_number']) || !isset($normalizedRow['first_name']) || !isset($normalizedRow['enrollment_status']) || !isset($normalizedRow['birth_date'])) {
+                    Log::warning("Skipping row: Missing required fields", ['row' => $row]);
+                    continue;
+                }
 
-                // Validate GWA (ensure it's numeric, otherwise default to NULL)
-                $gwa = is_numeric($row['gwa']) ? $row['gwa'] : null;
+                // 🔹 Generate Student ID if missing
+                if (empty($normalizedRow['student_id'])) {
+                    $year = date('Y');
+                    $latestStudent = Student::latest('student_id')->first();
+                    $nextNumber = $latestStudent ? ((int)substr($latestStudent->student_id, 5)) + 1 : 10001;
+                    $normalizedRow['student_id'] = 'S' . $year . $nextNumber;
+                }
 
-                // Create Student
+                // 🔹 Create or Update Student
                 $student = Student::updateOrCreate(
-                    ['student_id' => $studentId],
+                    ['student_id' => $normalizedRow['student_id']],
                     [
-                        'first_name' => $row['first_name'],
-                        'middle_name' => $row['middle_name'] ?? null,
-                        'last_name' => $row['last_name'],
-                        'suffix' => $row['suffix'] ?? null,
-                        'birth_date' => $row['birth_date'],
-                        'gender' => $row['gender'],
-                        'nationality' => $row['nationality'],
-                        'religion' => $row['religion'] ?? null,
-                        'blood_type' => $row['blood_type'] ?? null,
-                        'student_type' => $row['student_type'],
+                        'first_name' => $normalizedRow['first_name'],
+                        'middle_name' => $normalizedRow['middle_name'] ?? null,
+                        'last_name' => $normalizedRow['last_name'],
+                        'suffix' => $normalizedRow['suffix'] ?? null,
+                        'birth_date' => $normalizedRow['birth_date'],
+                        'gender' => $normalizedRow['gender'],
+                        'nationality' => $normalizedRow['nationality'],
+                        'religion' => $normalizedRow['religion'] ?? null,
+                        'blood_type' => $normalizedRow['blood_type'] ?? null,
+                        'student_type' => $normalizedRow['student_type'],
                     ]
                 );
 
-                // Create Academic Record
+                // 🔹 Create Academic Record
                 Academic::updateOrCreate(
                     ['student_id' => $student->student_id],
                     [
-                        'student_number' => $row['student_number'],
-                        'enrollment_status' => $enrollmentStatus,
-                        'year_level' => $row['year_level'],
-                        'college' => $row['college'],
-                        'program' => $row['program'],
-                        'section' => $row['section'],
-                        'gwa' => $gwa,
+                        'student_number' => $normalizedRow['student_number'],
+                        'enrollment_status' => $normalizedRow['enrollment_status'],
+                        'year_level' => $normalizedRow['year_level'],
+                        'college' => $normalizedRow['college'],
+                        'program' => $normalizedRow['program'],
+                        'section' => $normalizedRow['section'],
+                        'gwa' => is_numeric($normalizedRow['gwa']) ? $normalizedRow['gwa'] : null,
                     ]
                 );
 
-                // Create Contact Record
+                // 🔹 Create Contact Record
                 Contact::updateOrCreate(
                     ['student_id' => $student->student_id],
                     [
-                        'email' => $row['email'] ?? null,
-                        'phone_number' => $row['phone_number'] ?? null,
-                        'address' => $row['address'] ?? null,
-                        'guardian_name' => $row['guardian_name'] ?? null,
-                        'guardian_contact' => $row['guardian_contact'] ?? null,
-                        'emergency_contact' => $row['emergency_contact'] ?? null,
+                        'email' => $normalizedRow['email'] ?? null,
+                        'phone_number' => $normalizedRow['phone_number'] ?? null,
+                        'address' => $normalizedRow['address'] ?? null,
+                        'guardian_name' => $normalizedRow['guardian_name'] ?? null,
+                        'guardian_contact' => $normalizedRow['guardian_contact'] ?? null,
+                        'emergency_contact' => $normalizedRow['emergency_contact'] ?? null,
                     ]
                 );
 
-                // Handle Skills (multiple values separated by ",")
-                if (!empty($row['skills'])) {
-                    $skillsArray = explode(',', $row['skills']);
-                    foreach ($skillsArray as $skill) {
-                        $parts = explode(':', trim($skill)); // Format: "SkillName:Proficiency"
-                        if (count($parts) == 2) {
+                // 🔹 Handle Skills
+                if (!empty($normalizedRow['skills']) && !empty($normalizedRow['proficiency_levels'])) {
+                    $skillsArray = explode(',', $normalizedRow['skills']);
+                    $proficiencyArray = explode(',', $normalizedRow['proficiency_levels']);
+
+                    if (count($skillsArray) === count($proficiencyArray)) {
+                        foreach ($skillsArray as $index => $skill) {
                             Skill::updateOrCreate(
-                                ['student_id' => $student->student_id, 'skill_name' => trim($parts[0])],
-                                ['proficiency_level' => trim($parts[1])]
+                                ['student_id' => $student->student_id, 'skill_name' => trim($skill)],
+                                ['proficiency_level' => trim($proficiencyArray[$index])]
                             );
                         }
+                    } else {
+                        Log::warning("Mismatched skills and proficiency levels for student", ['row' => $row]);
                     }
                 }
 
-                // Handle Achievements (multiple values separated by ",")
-                if (!empty($row['achievements'])) {
-                    $achievementsArray = explode(',', $row['achievements']);
-                    foreach ($achievementsArray as $achievement) {
-                        $parts = explode(':', trim($achievement)); // Format: "AchievementName:Category:Date:AwardingBody"
-                        if (count($parts) == 4) {
+                // 🔹 Handle Achievements
+                if (!empty($normalizedRow['achievements']) && !empty($normalizedRow['categories']) && !empty($normalizedRow['award_dates']) && !empty($normalizedRow['awarding_bodies'])) {
+                    $achievementsArray = explode(',', $normalizedRow['achievements']);
+                    $categoriesArray = explode(',', $normalizedRow['categories']);
+                    $awardDatesArray = explode(',', $normalizedRow['award_dates']);
+                    $awardingBodiesArray = explode(',', $normalizedRow['awarding_bodies']);
+
+                    if (
+                        count($achievementsArray) === count($categoriesArray) &&
+                        count($categoriesArray) === count($awardDatesArray) &&
+                        count($awardDatesArray) === count($awardingBodiesArray)
+                    ) {
+                        foreach ($achievementsArray as $index => $achievement) {
                             Achievement::updateOrCreate(
-                                ['student_id' => $student->student_id, 'achievement_name' => trim($parts[0])],
+                                ['student_id' => $student->student_id, 'achievement_name' => trim($achievement)],
                                 [
-                                    'category' => trim($parts[1]),
-                                    'award_date' => trim($parts[2]) ?: now(),
-                                    'awarding_body' => trim($parts[3]),
+                                    'category' => trim($categoriesArray[$index]),
+                                    'award_date' => trim($awardDatesArray[$index]) ?: now(),
+                                    'awarding_body' => trim($awardingBodiesArray[$index]),
                                 ]
                             );
                         }
+                    } else {
+                        Log::warning("Mismatched achievements data for student", ['row' => $row]);
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (Throwable $e) {
                 Log::error('Error importing student', ['message' => $e->getMessage(), 'row' => $row]);
             }
         }
+    }
+
+    public function chunkSize(): int
+    {
+        return 500; // Processes data in chunks of 500 rows
     }
 }
