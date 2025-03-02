@@ -346,45 +346,47 @@ class AdminController extends Controller
             'name' => $validatedData['name'],
             'email' => $validatedData['email'],
             'password' => bcrypt($validatedData['password']),
+            'email_verified_at' => now(), // ✅ Auto-verifies the email
         ]);
 
+        //room for improvemnt.. could auto mail this out to the user
         return redirect()->route('admin.accounts.index')->with('success', 'Account Added Successfully!');
     }
 
     /**
      * Display the specified user account.
      */
-    public function showAccount($id)
-    {
-        $user = User::findOrFail($id);
-        return view('admin.accounts.show', compact('user'));
-    }
+    // public function showAccount($id)
+    // {
+    //     $user = User::findOrFail($id);
+    //     return view('admin.accounts.show', compact('user'));
+    // }
 
     /**
      * Show the form for editing the specified account.
      */
-    public function editAccount($id)
-    {
-        $user = User::findOrFail($id);
-        return view('admin.accounts.edit', compact('user'));
-    }
+    // public function editAccount($id)
+    // {
+    //     $user = User::findOrFail($id);
+    //     return view('admin.accounts.edit', compact('user'));
+    // }
 
     /**
      * Update the specified account in the database.
      */
-    public function updateAccount(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
+    // public function updateAccount(Request $request, $id)
+    // {
+    //     $user = User::findOrFail($id);
 
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:50',
-            'email' => 'required|email|unique:users,email,' . $id,
-        ]);
+    //     $validatedData = $request->validate([
+    //         'name' => 'required|string|max:50',
+    //         'email' => 'required|email|unique:users,email,' . $id,
+    //     ]);
 
-        $user->update($validatedData);
+    //     $user->update($validatedData);
 
-        return redirect()->route('admin.accounts.index')->with('success', 'Account Updated Successfully!');
-    }
+    //     return redirect()->route('admin.accounts.index')->with('success', 'Account Updated Successfully!');
+    // }
 
     /**
      * Remove the specified account from the database.

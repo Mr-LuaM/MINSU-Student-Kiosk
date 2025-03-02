@@ -51,9 +51,9 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/accounts', [AdminController::class, 'accountsIndex'])->name('admin.accounts.index');
     Route::get('/accounts/create', [AdminController::class, 'createAccount'])->name('admin.accounts.create');
     Route::post('/accounts', [AdminController::class, 'storeAccount'])->name('admin.accounts.store');
-    Route::get('/accounts/{id}', [AdminController::class, 'showAccount'])->name('admin.accounts.show');
-    Route::get('/accounts/{id}/edit', [AdminController::class, 'editAccount'])->name('admin.accounts.edit');
-    Route::put('/accounts/{id}', [AdminController::class, 'updateAccount'])->name('admin.accounts.update');
+    // Route::get('/accounts/{id}', [AdminController::class, 'showAccount'])->name('admin.accounts.show'); //remove unneccesary
+    // Route::get('/accounts/{id}/edit', [AdminController::class, 'editAccount'])->name('admin.accounts.edit');
+    // Route::put('/accounts/{id}', [AdminController::class, 'updateAccount'])->name('admin.accounts.update');
     Route::delete('/accounts/{id}', [AdminController::class, 'deleteAccount'])->name('admin.accounts.destroy');
 });
 

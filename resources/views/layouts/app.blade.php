@@ -48,7 +48,7 @@
 <body class="font-sans antialiased relative flex flex-col min-h-screen text-white">
 
     {{-- Navigation Bar (Ensures it's above the overlay) --}}
-    <header class="relative z-100">
+    <header class="relative z-50">
         @include('layouts.navigation')
     </header>
 
