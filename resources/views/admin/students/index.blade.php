@@ -1,8 +1,8 @@
 <x-app-layout>
     <div class="container mx-auto px-6 py-8">
         <!-- Header Row 1: Title & Search -->
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-            <h1 class="text-3xl font-bold text-gwhite">Manage Students</h1>
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+            <h1 class="text-3xl font-bold text-white">Manage Students</h1>
 
             <!-- Search Form -->
             <form method="GET" action="{{ route('admin.students.index') }}" class="flex items-center space-x-2 w-full md:w-auto">
@@ -47,15 +47,15 @@
         </div>
 
         <!-- Student Table -->
-        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-            <table class="w-full border-collapse">
+        <div class="bg-white shadow-lg rounded-lg overflow-x-auto">
+            <table class="w-full border-collapse min-w-[800px]">
                 <thead class="bg-primary text-white text-lg">
                     <tr>
-                        <th class="px-6 py-4 text-left">Student ID</th>
-                        <th class="px-6 py-4 text-left">Name</th>
-                        <th class="px-6 py-4 text-left">Program</th>
-                        <th class="px-6 py-4 text-left">Year Level</th>
-                        <th class="px-6 py-4 text-left">Status</th>
+                        <th class="px-6 py-4 text-left cursor-pointer" onclick="sortTable(0)">Student ID ⬍</th>
+                        <th class="px-6 py-4 text-left cursor-pointer" onclick="sortTable(1)">Name ⬍</th>
+                        <th class="px-6 py-4 text-left cursor-pointer" onclick="sortTable(2)">Program ⬍</th>
+                        <th class="px-6 py-4 text-left cursor-pointer" onclick="sortTable(3)">Year Level ⬍</th>
+                        <th class="px-6 py-4 text-left cursor-pointer" onclick="sortTable(4)">Status ⬍</th>
                         <th class="px-6 py-4 text-left">Actions</th>
                     </tr>
                 </thead>
@@ -112,4 +112,23 @@
             {{ $students->links() }}
         </div>
     </div>
+
+    <!-- JavaScript for Sortable Table -->
+    <script>
+        function sortTable(colIndex) {
+            let table = document.querySelector("table tbody");
+            let rows = Array.from(table.querySelectorAll("tr"));
+
+            let sortedRows = rows.sort((a, b) => {
+                let aText = a.cells[colIndex].innerText.trim();
+                let bText = b.cells[colIndex].innerText.trim();
+                return aText.localeCompare(bText, undefined, {
+                    numeric: true
+                });
+            });
+
+            table.innerHTML = "";
+            sortedRows.forEach(row => table.appendChild(row));
+        }
+    </script>
 </x-app-layout>
