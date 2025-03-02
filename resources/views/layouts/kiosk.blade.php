@@ -40,7 +40,7 @@
 
     <script>
         let idleTime = 0;
-        const idleLimit = 10 * 60; // 10 minutes (600 seconds)
+        const idleLimit = 5 * 60; // 5 minutes (300 seconds)
         const idleRedirectUrl = "{{ config('app.idle_redirect_url') }}"; // Get URL from Laravel config
 
         function resetIdleTimer() {

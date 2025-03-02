@@ -10,6 +10,11 @@ use App\Models\Skill;
 use App\Models\Achievement;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\StudentsTemplateExport;
+use App\Exports\StudentsExport;
+use App\Imports\StudentsImport;
+
 
 class AdminController extends Controller
 {
@@ -388,5 +393,29 @@ class AdminController extends Controller
     {
         User::findOrFail($id)->delete();
         return redirect()->route('admin.accounts.index')->with('success', 'Account Deleted Successfully!');
+    }
+
+    // ✅ Download Import Template
+    public function downloadTemplate()
+    {
+        return Excel::download(new StudentsTemplateExport, 'students_template.xlsx');
+    }
+
+    // ✅ Export All Students
+    public function exportStudents()
+    {
+        return Excel::download(new StudentsExport, 'students.xlsx');
+    }
+
+    // ✅ Import Students from Uploaded File
+    public function importStudents(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv'
+        ]);
+
+        Excel::import(new StudentsImport, $request->file('file'));
+
+        return back()->with('success', 'Students Imported Successfully!');
     }
 }
