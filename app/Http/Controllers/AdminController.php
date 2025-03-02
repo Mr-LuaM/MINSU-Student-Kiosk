@@ -14,7 +14,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\StudentsTemplateExport;
 use App\Exports\StudentsExport;
 use App\Imports\StudentsImport;
-
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -23,9 +23,46 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
-        return view('admin.dashboard');
-    }
+        // Fetch total counts
+        $totalAdmins = User::count();
+        $totalStudents = Student::count();
 
+        // Fetch recent 5 admins and students
+        $recentAdmins = User::latest()->limit(5)->get();
+        $recentStudents = Student::latest()->limit(5)->get();
+
+        // Fetch student enrollment trends (last 6 months)
+        $studentEnrollment = Student::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->where('created_at', '>=', Carbon::now()->subMonths(6))
+            ->groupBy('date')
+            ->orderBy('date', 'ASC')
+            ->get();
+
+        $studentEnrollmentDates = $studentEnrollment->pluck('date');
+        $studentEnrollmentCounts = $studentEnrollment->pluck('count');
+
+        // Fetch admin account growth (last 6 months)
+        $adminGrowth = User::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->where('created_at', '>=', Carbon::now()->subMonths(6))
+            ->groupBy('date')
+            ->orderBy('date', 'ASC')
+            ->get();
+
+        $adminGrowthDates = $adminGrowth->pluck('date');
+        $adminGrowthCounts = $adminGrowth->pluck('count');
+
+        // Pass data to the view
+        return view('admin.dashboard', compact(
+            'totalAdmins',
+            'totalStudents',
+            'recentAdmins',
+            'recentStudents',
+            'studentEnrollmentDates',
+            'studentEnrollmentCounts',
+            'adminGrowthDates',
+            'adminGrowthCounts'
+        ));
+    }
     // ===========================
     // ✅ STUDENT MANAGEMENT
     // ===========================

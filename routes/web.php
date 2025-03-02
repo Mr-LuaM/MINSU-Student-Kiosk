@@ -12,9 +12,10 @@ use App\Http\Controllers\ProfileController;
 
 // === AUTHENTICATED DASHBOARD ===
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    // Route::get('/dashboard', function () {
+    //     return view('dashboard');
+    // })->name('dashboard');
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -31,7 +32,6 @@ Route::prefix('kiosk')->group(function () {
 
 // === ADMIN PANEL ROUTES (🔐 Requires Authentication) ===
 Route::middleware(['auth'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
     // Manage Students (Now under AdminController)   // Import/Export Students
     Route::get('/students', [AdminController::class, 'studentsIndex'])->name('admin.students.index');
