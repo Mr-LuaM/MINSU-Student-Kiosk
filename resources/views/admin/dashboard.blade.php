@@ -82,14 +82,31 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            if (typeof Chart === "undefined") {
+                console.error("Chart.js is NOT loaded.");
+                return;
+            }
+
+            // Load formatted data from Laravel
+            let studentEnrollmentDates = @json($studentEnrollmentDates); // ["Jan 2025", "Feb 2025"]
+            let studentEnrollmentCounts = @json($studentEnrollmentCounts); // [5, 3, 2]
+            let adminGrowthDates = @json($adminGrowthDates); // ["Jan 2025", "Feb 2025"]
+            let adminGrowthCounts = @json($adminGrowthCounts); // [2, 1, 3]
+
+            console.log("Fixed Student Enrollment Dates:", studentEnrollmentDates);
+            console.log("Fixed Student Enrollment Counts:", studentEnrollmentCounts);
+            console.log("Fixed Admin Growth Dates:", adminGrowthDates);
+            console.log("Fixed Admin Growth Counts:", adminGrowthCounts);
+
+            // Student Enrollment Trend Chart
             var ctx1 = document.getElementById('studentChart').getContext('2d');
             new Chart(ctx1, {
                 type: 'line',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                    labels: studentEnrollmentDates,
                     datasets: [{
                         label: 'New Students',
-                        data: [10, 20, 30, 25, 40],
+                        data: studentEnrollmentCounts,
                         backgroundColor: 'rgba(0, 124, 61, 0.2)',
                         borderColor: '#007C3D',
                         borderWidth: 2
@@ -98,18 +115,32 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    aspectRatio: 2 // Adjust this to control chart height
+                    aspectRatio: 2,
+                    scales: {
+                        x: {
+                            ticks: {
+                                autoSkip: true,
+                                maxTicksLimit: 6,
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                stepSize: 1,
+                            }
+                        }
+                    }
                 }
             });
 
+            // Admin Account Growth Chart
             var ctx2 = document.getElementById('accountChart').getContext('2d');
             new Chart(ctx2, {
                 type: 'bar',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                    labels: adminGrowthDates,
                     datasets: [{
                         label: 'New Admins',
-                        data: [2, 5, 3, 6, 4],
+                        data: adminGrowthCounts,
                         backgroundColor: 'rgba(0, 124, 221, 0.2)',
                         borderColor: '#007C3D',
                         borderWidth: 2
@@ -118,10 +149,25 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    aspectRatio: 2 // Adjust as needed
+                    aspectRatio: 2,
+                    scales: {
+                        x: {
+                            ticks: {
+                                autoSkip: true,
+                                maxTicksLimit: 6,
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                stepSize: 1,
+                            }
+                        }
+                    }
                 }
             });
         });
     </script>
+
+
 
 </x-app-layout>

@@ -23,7 +23,6 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
-        // Fetch total counts
         $totalAdmins = User::count();
         $totalStudents = Student::count();
 
@@ -32,37 +31,55 @@ class AdminController extends Controller
         $recentStudents = Student::latest()->limit(5)->get();
 
         // Fetch student enrollment trends (last 6 months)
-        $studentEnrollment = Student::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+        $studentEnrollment = Student::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as count')
             ->where('created_at', '>=', Carbon::now()->subMonths(6))
-            ->groupBy('date')
-            ->orderBy('date', 'ASC')
+            ->groupBy('month')
+            ->orderBy('month', 'ASC')
             ->get();
 
-        $studentEnrollmentDates = $studentEnrollment->pluck('date');
-        $studentEnrollmentCounts = $studentEnrollment->pluck('count');
+        $studentData = $this->fillMissingMonths($studentEnrollment);
 
         // Fetch admin account growth (last 6 months)
-        $adminGrowth = User::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+        $adminGrowth = User::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as count')
             ->where('created_at', '>=', Carbon::now()->subMonths(6))
-            ->groupBy('date')
-            ->orderBy('date', 'ASC')
+            ->groupBy('month')
+            ->orderBy('month', 'ASC')
             ->get();
 
-        $adminGrowthDates = $adminGrowth->pluck('date');
-        $adminGrowthCounts = $adminGrowth->pluck('count');
+        $adminData = $this->fillMissingMonths($adminGrowth);
 
-        // Pass data to the view
-        return view('admin.dashboard', compact(
-            'totalAdmins',
-            'totalStudents',
-            'recentAdmins',
-            'recentStudents',
-            'studentEnrollmentDates',
-            'studentEnrollmentCounts',
-            'adminGrowthDates',
-            'adminGrowthCounts'
-        ));
+        // 🚀 Convert labels properly before sending to the Blade file
+        return view('admin.dashboard', [
+            'totalAdmins' => $totalAdmins,
+            'totalStudents' => $totalStudents,
+            'recentAdmins' => $recentAdmins,
+            'recentStudents' => $recentStudents,
+            'studentEnrollmentDates' => array_keys($studentData), // ["Jan 2025", "Feb 2025"]
+            'studentEnrollmentCounts' => array_values($studentData), // [5, 3, 2]
+            'adminGrowthDates' => array_keys($adminData), // ["Jan 2025", "Feb 2025"]
+            'adminGrowthCounts' => array_values($adminData) // [2, 1, 3]
+        ]);
     }
+
+    /**
+     * Fill missing months with zero counts & format as "MMM YYYY"
+     */
+    private function fillMissingMonths($data)
+    {
+        $months = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = Carbon::now()->subMonths($i)->format('M Y'); // Format as "Jan 2025"
+            $months[$month] = 0; // Default count = 0
+        }
+
+        foreach ($data as $row) {
+            $formattedMonth = Carbon::createFromFormat('Y-m', $row->month)->format('M Y');
+            $months[$formattedMonth] = $row->count;
+        }
+
+        return $months;
+    }
+
     // ===========================
     // ✅ STUDENT MANAGEMENT
     // ===========================
