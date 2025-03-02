@@ -19,10 +19,10 @@ class StudentKioskController extends Controller
     /**
      * Display the Student Search Page.
      */
-    public function index()
-    {
-        return view('kiosk.index');
-    }
+    // public function index()
+    // {
+    //     return view('kiosk.index');
+    // }
 
     /**
      * Display Home Page.
@@ -40,10 +40,10 @@ class StudentKioskController extends Controller
     /**
      * Display Guidelines.
      */
-    public function guidelines()
-    {
-        return view('kiosk.guidelines');
-    }
+    // public function guidelines()
+    // {
+    //     return view('kiosk.guidelines');
+    // }
 
     /**
      * Search for students
