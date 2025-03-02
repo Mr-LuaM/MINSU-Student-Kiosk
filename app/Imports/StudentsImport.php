@@ -9,96 +9,106 @@ use App\Models\Skill;
 use App\Models\Achievement;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Carbon\Carbon;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Illuminate\Support\Facades\Log;
 
-class StudentsImport implements ToCollection
+class StudentsImport implements ToCollection, WithHeadingRow
 {
     public function collection(Collection $rows)
     {
-        foreach ($rows as $index => $row) {
-            if ($index === 0) continue; // Skip headers
-
-            $studentId = $row[0] ?? null;
-            $studentNumber = $row[10] ?? null;
-
-            if (!$studentId) {
+        foreach ($rows as $row) {
+            try {
+                // Generate Student ID if missing (e.g., S+YEAR+INCREMENT format)
+                $year = date('Y');
                 $latestStudent = Student::latest('student_id')->first();
-                $latestNumber = $latestStudent ? (int)substr($latestStudent->student_id, 1) : 18000;
-                $studentId = 'S' . ($latestNumber + 1);
-            }
+                $nextNumber = $latestStudent ? ((int)substr($latestStudent->student_id, 5)) + 1 : 10001;
+                $studentId = 'S' . $year . $nextNumber;
 
-            // Ensure valid date formats
-            $birthDate = $row[5] ?? now()->format('Y-m-d');
-            $awardDates = explode(',', $row[27] ?? now()->format('Y-m-d'));
+                // Validate enrollment_status to match ENUM values
+                $validEnrollmentStatuses = ['Enrolled', 'Dropped', 'Graduated'];
+                $enrollmentStatus = in_array($row['enrollment_status'], $validEnrollmentStatuses) ?
+                    $row['enrollment_status'] : 'Enrolled';
 
-            $student = Student::updateOrCreate(
-                ['student_id' => $studentId],
-                [
-                    'first_name' => $row[1] ?? 'Unknown',
-                    'middle_name' => $row[2] ?? '',
-                    'last_name' => $row[3] ?? 'Unknown',
-                    'suffix' => $row[4] ?? '',
-                    'birth_date' => Carbon::parse($birthDate)->format('Y-m-d'),
-                    'gender' => $row[6] ?? 'Other',
-                    'nationality' => $row[7] ?? 'Unknown',
-                    'religion' => $row[8] ?? 'Unknown',
-                    'blood_type' => $row[9] ?? 'Unknown',
-                    'student_type' => $row[10] ?? 'Regular',
-                ]
-            );
+                // Validate GWA (ensure it's numeric, otherwise default to NULL)
+                $gwa = is_numeric($row['gwa']) ? $row['gwa'] : null;
 
-            Academic::updateOrCreate(
-                ['student_id' => $studentId],
-                [
-                    'student_number' => $studentNumber,
-                    'enrollment_status' => $row[11] ?? 'Enrolled',
-                    'year_level' => $row[12] ?? 1,
-                    'college' => $row[13] ?? 'Unknown',
-                    'program' => $row[14] ?? 'Unknown',
-                    'section' => $row[15] ?? 'Unknown',
-                    'gwa' => is_numeric($row[16]) ? $row[16] : null,
-                ]
-            );
+                // Create Student
+                $student = Student::updateOrCreate(
+                    ['student_id' => $studentId],
+                    [
+                        'first_name' => $row['first_name'],
+                        'middle_name' => $row['middle_name'] ?? null,
+                        'last_name' => $row['last_name'],
+                        'suffix' => $row['suffix'] ?? null,
+                        'birth_date' => $row['birth_date'],
+                        'gender' => $row['gender'],
+                        'nationality' => $row['nationality'],
+                        'religion' => $row['religion'] ?? null,
+                        'blood_type' => $row['blood_type'] ?? null,
+                        'student_type' => $row['student_type'],
+                    ]
+                );
 
-            Contact::updateOrCreate(
-                ['student_id' => $studentId],
-                [
-                    'email' => $row[17] ?? 'N/A',
-                    'phone_number' => $row[18] ?? 'N/A',
-                    'address' => $row[19] ?? 'N/A',
-                    'guardian_name' => $row[20] ?? 'N/A',
-                    'guardian_contact' => $row[21] ?? 'N/A',
-                    'emergency_contact' => $row[22] ?? 'N/A',
-                ]
-            );
+                // Create Academic Record
+                Academic::updateOrCreate(
+                    ['student_id' => $student->student_id],
+                    [
+                        'student_number' => $row['student_number'],
+                        'enrollment_status' => $enrollmentStatus,
+                        'year_level' => $row['year_level'],
+                        'college' => $row['college'],
+                        'program' => $row['program'],
+                        'section' => $row['section'],
+                        'gwa' => $gwa,
+                    ]
+                );
 
-            if (!empty($row[23])) {
-                $skills = explode(',', $row[23]);
-                $proficiencyLevels = explode(',', $row[24] ?? 'Beginner');
-                Skill::where('student_id', $studentId)->delete();
-                foreach ($skills as $key => $skill) {
-                    Skill::create([
-                        'student_id' => $studentId,
-                        'skill_name' => trim($skill),
-                        'proficiency_level' => $proficiencyLevels[$key] ?? 'Beginner',
-                    ]);
+                // Create Contact Record
+                Contact::updateOrCreate(
+                    ['student_id' => $student->student_id],
+                    [
+                        'email' => $row['email'] ?? null,
+                        'phone_number' => $row['phone_number'] ?? null,
+                        'address' => $row['address'] ?? null,
+                        'guardian_name' => $row['guardian_name'] ?? null,
+                        'guardian_contact' => $row['guardian_contact'] ?? null,
+                        'emergency_contact' => $row['emergency_contact'] ?? null,
+                    ]
+                );
+
+                // Handle Skills (multiple values separated by ",")
+                if (!empty($row['skills'])) {
+                    $skillsArray = explode(',', $row['skills']);
+                    foreach ($skillsArray as $skill) {
+                        $parts = explode(':', trim($skill)); // Format: "SkillName:Proficiency"
+                        if (count($parts) == 2) {
+                            Skill::updateOrCreate(
+                                ['student_id' => $student->student_id, 'skill_name' => trim($parts[0])],
+                                ['proficiency_level' => trim($parts[1])]
+                            );
+                        }
+                    }
                 }
-            }
 
-            if (!empty($row[25])) {
-                $achievements = explode(',', $row[25]);
-                $categories = explode(',', $row[26] ?? 'Academic');
-                $awardingBodies = explode(',', $row[28] ?? 'Unknown');
-                Achievement::where('student_id', $studentId)->delete();
-                foreach ($achievements as $key => $achievement) {
-                    Achievement::create([
-                        'student_id' => $studentId,
-                        'achievement_name' => trim($achievement),
-                        'category' => $categories[$key] ?? 'Academic',
-                        'award_date' => $awardDates[$key] ?? now()->format('Y-m-d'),
-                        'awarding_body' => $awardingBodies[$key] ?? 'Unknown',
-                    ]);
+                // Handle Achievements (multiple values separated by ",")
+                if (!empty($row['achievements'])) {
+                    $achievementsArray = explode(',', $row['achievements']);
+                    foreach ($achievementsArray as $achievement) {
+                        $parts = explode(':', trim($achievement)); // Format: "AchievementName:Category:Date:AwardingBody"
+                        if (count($parts) == 4) {
+                            Achievement::updateOrCreate(
+                                ['student_id' => $student->student_id, 'achievement_name' => trim($parts[0])],
+                                [
+                                    'category' => trim($parts[1]),
+                                    'award_date' => trim($parts[2]) ?: now(),
+                                    'awarding_body' => trim($parts[3]),
+                                ]
+                            );
+                        }
+                    }
                 }
+            } catch (\Exception $e) {
+                Log::error('Error importing student', ['message' => $e->getMessage(), 'row' => $row]);
             }
         }
     }
