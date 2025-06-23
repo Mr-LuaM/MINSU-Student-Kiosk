@@ -5,8 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <title>{{ config('app.name', 'MINSU Student Kiosk') }}</title>
+    <meta name="title" content="MINSU Student Kiosk">
+    <meta name="description" content="Find student information quickly and easily at MINSU. A modern and user-friendly student kiosk system.">
+    <link rel="icon" href="{{ asset('assets/images/minsu-logo.png') }}" type="image/png">
+    <title>{{ config('app.name', 'Laravel') }}</title>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -50,7 +52,7 @@
 <body class="font-sans antialiased relative flex flex-col min-h-screen text-white">
 
     {{-- Navigation Bar (Ensures it's above the overlay) --}}
-    <header class="relative z-50">
+    <header class="relative ">
         @include('layouts.navigation')
     </header>
 

@@ -53,7 +53,7 @@ class StudentKioskController extends Controller
     {
         $query = Student::with(['contact', 'academics', 'skills', 'achievements']);
 
-        // 🔍 Apply search across ALL fields
+        // Apply search across ALL fields
         if ($request->filled('search')) {
             $searchTerm = $request->input('search');
 
@@ -103,7 +103,7 @@ class StudentKioskController extends Controller
             });
         }
 
-        // 🔍 Apply Filters (strict AND)
+        // Apply Filters (strict AND)
         if ($request->filled('year_level')) {
             $query->whereHas('academics', function ($q) use ($request) {
                 $q->where('year_level', $request->year_level);

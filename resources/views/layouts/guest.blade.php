@@ -5,6 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="title" content="MINSU Student Kiosk">
+    <meta name="description" content="Find student information quickly and easily at MINSU. A modern and user-friendly student kiosk system.">
+    <link rel="icon" href="{{ asset('assets/images/minsu-logo.png') }}" type="image/png">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
@@ -27,7 +30,7 @@
 </head>
 
 <body class="relative font-sans text-gray-900 antialiased">
-    <livewire:toasts />
+    <!-- <livewire:toasts /> -->
 
     <!-- Background Tint Overlay (Behind Everything) -->
     <div class="absolute inset-0 bg-gray-900 opacity-50 z-0"></div>

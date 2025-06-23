@@ -54,7 +54,7 @@
 
             {{-- Search Button --}}
             <button type="submit" id="searchButton"
-                class="mt-8 sm:mt-10 px-14 sm:px-16 py-6 sm:py-8 text-3xl sm:text-4xl md:text-5xl font-bold bg-secondary text-black 
+                class="mt-8 sm:mt-10 px-14 sm:px-16 py-6 sm:py-8 text-3xl sm:text-4xl md:text-5xl font-bold bg-secondary text-gray-900 
             rounded-kiosk shadow-lg hover:shadow-xl hover:opacity-90 transition-all 
             focus:ring-4 focus:ring-white border-4 border-white">
                 🔍 Search

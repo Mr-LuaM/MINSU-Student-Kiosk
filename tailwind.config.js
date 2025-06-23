@@ -73,6 +73,7 @@ export default {
 
             fontSize: {
                 sm: ['1rem', { lineHeight: '1.5rem' }],
+                md: ['1.125rem', { lineHeight: '1.75rem' }],
                 base: ['1.25rem', { lineHeight: '1.75rem' }],
                 lg: ['1.75rem', { lineHeight: '2.25rem' }],
                 xl: ['2.25rem', { lineHeight: '2.75rem' }],

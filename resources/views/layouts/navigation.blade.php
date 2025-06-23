@@ -27,7 +27,7 @@
             </div>
 
             <!-- User Dropdown (Right) -->
-            <div class="hidden md:flex items-center relative z-50">
+            <div class="hidden md:flex items-center relative ">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="flex items-center px-5 py-3 text-white font-medium bg-primary rounded-md focus:outline-none text-[1.2rem]">

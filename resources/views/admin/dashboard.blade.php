@@ -93,10 +93,10 @@
             let adminGrowthDates = @json($adminGrowthDates); // ["Jan 2025", "Feb 2025"]
             let adminGrowthCounts = @json($adminGrowthCounts); // [2, 1, 3]
 
-            console.log("Fixed Student Enrollment Dates:", studentEnrollmentDates);
-            console.log("Fixed Student Enrollment Counts:", studentEnrollmentCounts);
-            console.log("Fixed Admin Growth Dates:", adminGrowthDates);
-            console.log("Fixed Admin Growth Counts:", adminGrowthCounts);
+            // console.log("Fixed Student Enrollment Dates:", studentEnrollmentDates);
+            // console.log("Fixed Student Enrollment Counts:", studentEnrollmentCounts);
+            // console.log("Fixed Admin Growth Dates:", adminGrowthDates);
+            // console.log("Fixed Admin Growth Counts:", adminGrowthCounts);
 
             // Student Enrollment Trend Chart
             var ctx1 = document.getElementById('studentChart').getContext('2d');

@@ -8,7 +8,7 @@
 
         {{-- Back to Search Button --}}
         <a href="{{ route('kiosk.home') }}"
-            class="mb-6 px-12 py-6 text-3xl font-bold bg-secondary text-black rounded-kiosk shadow-lg hover:opacity-90 transition-all focus:ring-white border-4 border-white">
+            class="mb-6 px-12 py-6 text-3xl font-bold bg-secondary text-black rounded-kiosk shadow-lg hover:opacity-90 transition-all focus:ring-primary border-4 border-primary">
             ⬅ Back to Search
         </a>
 
@@ -16,28 +16,42 @@
         @if($students->isEmpty())
         <p class="text-default text-3xl sm:text-4xl">No students found.</p>
         @else
-        <div class="w-full max-w-5xl space-y-6">
+        <div class="w-full max-w-6xl mx-auto grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             @foreach($students as $student)
-            <div class="p-6 border-4 border-primary bg-white hover:bg-secondary hover:text-white 
-                        rounded-lg text-xl sm:text-2xl md:text-3xl transition-all shadow-md cursor-pointer"
-                onclick="openStudentModal('{{ $student->student_id }}')">
+            <div class="p-6 border-4 border-primary bg-white rounded-lg shadow-md cursor-pointer transition-all duration-300
+                hover:bg-secondary text-gray-900 hover:shadow-lg hover:scale-105"
+                onclick=" openStudentModal('{{ $student->student_id }}')">
 
-                {{-- Student Basic Info --}}
-                <p class="font-bold text-gray-900 hover:text-white">
-                    {{ $student->first_name }} {{ $student->last_name }}
-                </p>
-                <p class="text-lg sm:text-xl text-gray-700 hover:text-white">
-                    {{ $student->student_id }} • {{ $student->contact->email ?? 'No Email' }}
-                </p>
-                <p class="text-md sm:text-lg text-gray-600 hover:text-white">
-                    {{ $student->academics->year_level ?? 'N/A' }} - {{ $student->academics->program ?? 'N/A' }}
-                </p>
-                <p class="text-md sm:text-lg text-gray-600 hover:text-white">
-                    📍 {{ $student->contact->address ?? 'No Address' }} • 🎓 {{ $student->student_type }}
-                </p>
+                {{-- Header --}}
+                <div class="flex justify-between mb-4">
+                    <h2 class="text-lg font-bold">{{ $student->first_name }} {{ $student->last_name }}</h2>
+                    <span class="text-lg text-gray-500">{{ $student->student_id }}</span>
+                </div>
+
+                {{-- Contact --}}
+                <div class="mb-4 flex flex-col gap-2 text-start">
+                    <p class="text-md font-semibold text-gray-700"><span class="font-bold text-gray-900">Email:</span> {{ $student->contact->email ?? 'No Email' }}</p>
+                    <p class="text-md font-semibold text-gray-700"><span class="font-bold text-gray-900">Address:</span> {{ $student->contact->address ?? 'No Address' }}</p>
+                </div>
+
+
+                {{-- Academics --}}
+                <div class="flex flex-wrap justify-end gap-3 pt-5">
+                    <span class="px-4 py-2 rounded-full bg-primary text-white  font-semibold">
+                        Year: {{ $student->academics->year_level ?? 'N/A' }}
+                    </span>
+                    <span class="px-4 py-2 rounded-full bg-primary text-white  font-semibold">
+                        {{ $student->academics->program ?? 'N/A' }}
+                    </span>
+                    <span class="px-4 py-2 rounded-full bg-primary text-white  font-semibold">
+                        {{ $student->student_type }}
+                    </span>
+                </div>
+
             </div>
             @endforeach
         </div>
+
 
         {{-- Pagination --}}
         <div class="mt-6">

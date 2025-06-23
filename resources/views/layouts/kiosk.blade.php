@@ -4,7 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MINSU Student Kiosk</title>
+    <title>{{ config('app.name', 'Laravel') }}</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="title" content="MINSU Student Kiosk">
+    <meta name="description" content="Find student information quickly and easily at MINSU. A modern and user-friendly student kiosk system.">
+    <link rel="icon" href="{{ asset('assets/images/minsu-logo.png') }}" type="image/png">
+
 
     @vite('resources/css/app.css')
 
@@ -13,7 +18,7 @@
 <body class="relative h-screen flex flex-col overflow-hidden text-white bg-cover bg-center bg-no-repeat"
     style="background-image: url('{{ asset('assets/images/minsu-bg.jpg') }}');">
 
-    <livewire:toasts />
+    <!-- <livewire:toasts /> -->
 
     {{-- Background Tint Overlay (Ensures better text readability) --}}
     <div class="absolute inset-0 bg-gray-900 opacity-50 -z-10"></div>
