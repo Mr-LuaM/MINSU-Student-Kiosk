@@ -48,15 +48,17 @@ class StudentKioskController extends Controller
     /**
      * Search for students
      */
+    //temporrary solution for filtering, could use a more efficeinet sorting algorith later on 
     public function search(Request $request)
     {
         $query = Student::with(['contact', 'academics', 'skills', 'achievements']);
 
-        // 🔍 Apply search across ALL fields in ALL tables
+        // 🔍 Apply search across ALL fields
         if ($request->filled('search')) {
             $searchTerm = $request->input('search');
 
             $query->where(function ($q) use ($searchTerm) {
+                // Main Student fields
                 $q->where('student_id', 'like', "%$searchTerm%")
                     ->orWhere('first_name', 'like', "%$searchTerm%")
                     ->orWhere('middle_name', 'like', "%$searchTerm%")
@@ -68,42 +70,44 @@ class StudentKioskController extends Controller
                     ->orWhere('religion', 'like', "%$searchTerm%")
                     ->orWhere('blood_type', 'like', "%$searchTerm%")
                     ->orWhere('student_type', 'like', "%$searchTerm%");
-            });
 
-            // 🔍 Search in Related Models
-            $query->orWhereHas('academics', function ($q) use ($searchTerm) {
-                $q->where('student_number', 'like', "%$searchTerm%")
-                    ->orWhere('enrollment_status', 'like', "%$searchTerm%")
-                    ->orWhere('year_level', 'like', "%$searchTerm%")
-                    ->orWhere('college', 'like', "%$searchTerm%")
-                    ->orWhere('program', 'like', "%$searchTerm%")
-                    ->orWhere('section', 'like', "%$searchTerm%");
-            });
+                // Related Models
+                $q->orWhereHas('academics', function ($subQ) use ($searchTerm) {
+                    $subQ->where('student_number', 'like', "%$searchTerm%")
+                        ->orWhere('enrollment_status', 'like', "%$searchTerm%")
+                        ->orWhere('year_level', 'like', "%$searchTerm%")
+                        ->orWhere('college', 'like', "%$searchTerm%")
+                        ->orWhere('program', 'like', "%$searchTerm%")
+                        ->orWhere('section', 'like', "%$searchTerm%");
+                });
 
-            $query->orWhereHas('contact', function ($q) use ($searchTerm) {
-                $q->where('email', 'like', "%$searchTerm%")
-                    ->orWhere('phone_number', 'like', "%$searchTerm%")
-                    ->orWhere('address', 'like', "%$searchTerm%")
-                    ->orWhere('guardian_name', 'like', "%$searchTerm%")
-                    ->orWhere('guardian_contact', 'like', "%$searchTerm%")
-                    ->orWhere('emergency_contact', 'like', "%$searchTerm%");
-            });
+                $q->orWhereHas('contact', function ($subQ) use ($searchTerm) {
+                    $subQ->where('email', 'like', "%$searchTerm%")
+                        ->orWhere('phone_number', 'like', "%$searchTerm%")
+                        ->orWhere('address', 'like', "%$searchTerm%")
+                        ->orWhere('guardian_name', 'like', "%$searchTerm%")
+                        ->orWhere('guardian_contact', 'like', "%$searchTerm%")
+                        ->orWhere('emergency_contact', 'like', "%$searchTerm%");
+                });
 
-            $query->orWhereHas('skills', function ($q) use ($searchTerm) {
-                $q->where('skill_name', 'like', "%$searchTerm%")
-                    ->orWhere('proficiency_level', 'like', "%$searchTerm%");
-            });
+                $q->orWhereHas('skills', function ($subQ) use ($searchTerm) {
+                    $subQ->where('skill_name', 'like', "%$searchTerm%")
+                        ->orWhere('proficiency_level', 'like', "%$searchTerm%");
+                });
 
-            $query->orWhereHas('achievements', function ($q) use ($searchTerm) {
-                $q->where('achievement_name', 'like', "%$searchTerm%")
-                    ->orWhere('category', 'like', "%$searchTerm%")
-                    ->orWhere('awarding_body', 'like', "%$searchTerm%");
+                $q->orWhereHas('achievements', function ($subQ) use ($searchTerm) {
+                    $subQ->where('achievement_name', 'like', "%$searchTerm%")
+                        ->orWhere('category', 'like', "%$searchTerm%")
+                        ->orWhere('awarding_body', 'like', "%$searchTerm%");
+                });
             });
         }
 
-        // 🔍 Apply Filters
+        // 🔍 Apply Filters (strict AND)
         if ($request->filled('year_level')) {
-            $query->whereHas('academics', fn($q) => $q->where('year_level', $request->year_level));
+            $query->whereHas('academics', function ($q) use ($request) {
+                $q->where('year_level', $request->year_level);
+            });
         }
 
         if ($request->filled('student_type')) {
@@ -111,12 +115,13 @@ class StudentKioskController extends Controller
         }
 
         if ($request->filled('program')) {
-            $query->whereHas('academics', fn($q) => $q->where('program', $request->program));
+            $query->whereHas('academics', function ($q) use ($request) {
+                $q->where('program', $request->program);
+            });
         }
 
-        // 🔍 Paginate & Keep Filters in URL
         $students = $query->paginate(10)->appends($request->query());
-        // var_dump($students);
+
         return view('kiosk.search-results', compact('students'));
     }
 }
